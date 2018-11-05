@@ -1,0 +1,9 @@
+---
+applications:
+- name: testibmappid
+  memory: 256M
+  instances: 1
+  path: target/testibmappid-0.0.1-SNAPSHOT.jar
+  health-check-type: process
+  env:
+    SPRING_PROFILES_ACTIVE : ibm
