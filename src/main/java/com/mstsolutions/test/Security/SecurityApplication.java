@@ -34,9 +34,15 @@ public class SecurityApplication extends WebSecurityConfigurerAdapter  {
         //Adding csrf token support to this configurer.
         http.authorizeRequests()
                 .antMatchers("/login**", "/user","/userInfo").authenticated()
+                .antMatchers("/test**").permitAll()
                 .and().logout().logoutSuccessUrl("/").permitAll()
                 .and().csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 
+    }
+	
+	@RequestMapping("/test")
+    public String printPros() {
+        return "";
     }
 	
 	@RequestMapping("/user")
