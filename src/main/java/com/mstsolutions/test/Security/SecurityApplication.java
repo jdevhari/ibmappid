@@ -28,20 +28,26 @@ import com.jayway.jsonpath.JsonPath;
 public class SecurityApplication extends WebSecurityConfigurerAdapter  {
 
 	public static void main(String[] args) {
-		String vcapServices = System.getenv().get("VCAP_SERVICES");
-        Optional<Map<String, Object>> maybeCredentials = parseOAuth2Credentials(vcapServices);
-        System.out.println(maybeCredentials.orElseThrow(() -> new RuntimeException("Oauth2 credentials not found in VCAP_SERVICES")));
+		HashMap<String, Object> props = new HashMap<>();
+		
+		try {
+			String vcapServices = System.getenv().get("VCAP_SERVICES");
+			Optional<Map<String, Object>> maybeCredentials = parseOAuth2Credentials(vcapServices);
+			System.out.println(maybeCredentials.orElseThrow(() -> new RuntimeException("Oauth2 credentials not found in VCAP_SERVICES")));
 
-        Map<String, Object> credentials = maybeCredentials.get();
-        HashMap<String, Object> props = new HashMap<>();
+			Map<String, Object> credentials = maybeCredentials.get();
+			
 
-        props.put("security.oauth2.client.clientId", credentials.get("clientId"));
-        props.put("security.oauth2.client.clientSecret", credentials.get("clientSecret"));
-        props.put("security.oauth2.client.accessTokenUri", credentials.get("tokenEndpoint"));
-        props.put("security.oauth2.client.userAuthorizationUri", credentials.get("authorizationEndpoint"));
-        props.put("security.oauth2.resource.userInfoUri", credentials.get("userInfoEndpoint"));
-        props.put("sample.oauth2.logoutEndpoint", credentials.get("logoutEndpoint"));
-        props.put("security.resources.chain.enabled", true);
+			props.put("security.oauth2.client.clientId", credentials.get("clientId"));
+			props.put("security.oauth2.client.clientSecret", credentials.get("clientSecret"));
+			props.put("security.oauth2.client.accessTokenUri", credentials.get("tokenEndpoint"));
+			props.put("security.oauth2.client.userAuthorizationUri", credentials.get("authorizationEndpoint"));
+			props.put("security.oauth2.resource.userInfoUri", credentials.get("userInfoEndpoint"));
+			props.put("sample.oauth2.logoutEndpoint", credentials.get("logoutEndpoint"));
+			props.put("security.resources.chain.enabled", true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		//SpringApplication.run(SecurityApplication.class, args);
 		new SpringApplicationBuilder()
         .sources(SecurityApplication.class)
