@@ -29,7 +29,6 @@ public class SecurityApplication extends WebSecurityConfigurerAdapter {
 
 	public static void main(String[] args) {
 		HashMap<String, Object> props = new HashMap<>();
-
 		try {
 			String vcapServices = System.getenv().get("VCAP_SERVICES");
 			Optional<Map<String, Object>> maybeCredentials = parseOAuth2Credentials(vcapServices);
@@ -37,17 +36,17 @@ public class SecurityApplication extends WebSecurityConfigurerAdapter {
 					.orElseThrow(() -> new RuntimeException("Oauth2 credentials not found in VCAP_SERVICES")));
 
 			Map<String, Object> credentials = maybeCredentials.get();
-
 			props.put("security.oauth2.client.clientId", credentials.get("clientId"));
-			props.put("security.oauth2.client.clientSecret", credentials.get("clientSecret"));
-			props.put("security.oauth2.client.accessTokenUri", credentials.get("tokenEndpoint"));
-			props.put("security.oauth2.client.userAuthorizationUri", credentials.get("authorizationEndpoint"));
-			props.put("security.oauth2.resource.userInfoUri", credentials.get("userInfoEndpoint"));
-			props.put("sample.oauth2.logoutEndpoint", credentials.get("logoutEndpoint"));
+			props.put("security.oauth2.client.clientSecret", credentials.get("secret"));
+			props.put("security.oauth2.client.accessTokenUri", credentials.get("oauthServerUrl") + "/token");
+			props.put("security.oauth2.client.userAuthorizationUri", credentials.get("oauthServerUrl") + "/authorization");
+			props.put("security.oauth2.resource.userInfoUri", credentials.get("oauthServerUrl") + "/userInfo");
+			props.put("sample.oauth2.logoutEndpoint",  System.getenv().get("logoutEndpoint"));
 			props.put("security.resources.chain.enabled", true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println(props);
 		new SpringApplicationBuilder().sources(SecurityApplication.class).properties(props).run(args);
 	}
 
@@ -59,7 +58,7 @@ public class SecurityApplication extends WebSecurityConfigurerAdapter {
 			return services.stream().filter(o -> {
 				Collection<String> tags = (Collection<String>) o.get("tags");
 				Collection<String> credentialKeys = ((Map<String, Object>) o.get("credentials")).keySet();
-				return (tags != null && tags.contains("oauth2")) || credentialKeys.contains("authorizationEndpoint");
+				return (tags != null && tags.contains("oauth2")) || credentialKeys.contains("oauthServerUrl");
 			}).findFirst().map(t -> (Map<String, Object>) t.get("credentials"));
 
 		}
